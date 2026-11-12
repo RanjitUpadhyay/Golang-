@@ -1,0 +1,86 @@
+
+package services
+
+import (
+	"errors"
+	"strings"
+
+	"student-management-system/models"
+	"student-management-system/repositories"
+)
+
+type StudentService struct {
+	Repo *repositories.StudentRepository
+}
+
+func NewStudentService(
+	repo *repositories.StudentRepository,
+) *StudentService {
+	return &StudentService{Repo: repo}
+}
+
+// CREATE STUDENT
+func (s *StudentService) Create(student *models.Student) error {
+
+	student.FirstName = strings.TrimSpace(student.FirstName)
+	student.LastName = strings.TrimSpace(student.LastName)
+	student.Email = strings.TrimSpace(student.Email)
+	student.EnrollmentNo = strings.TrimSpace(student.EnrollmentNo)
+
+	if student.FirstName == "" {
+		return errors.New("first name is required")
+	}
+
+	if student.Email == "" {
+		return errors.New("email is required")
+	}
+
+	if student.EnrollmentNo == "" {
+		return errors.New("enrollment number is required")
+	}
+
+	if student.DepartmentID == 0 || student.CourseID == 0 {
+		return errors.New("department and course are required")
+	}
+
+	return s.Repo.Create(student)
+}
+
+// GET ALL STUDENTS
+func (s *StudentService) GetAll() ([]models.Student, error) {
+	return s.Repo.FindAll()
+}
+
+// GET ONE STUDENT
+func (s *StudentService) GetByID(id uint) (models.Student, error) {
+	return s.Repo.FindByID(id)
+}
+
+// UPDATE STUDENT
+func (s *StudentService) Update(
+	id uint,
+	data map[string]interface{},
+) error {
+
+	if len(data) == 0 {
+		return errors.New("no update data provided")
+	}
+
+	_, err := s.Repo.FindByID(id)
+	if err != nil {
+		return err
+	}
+
+	return s.Repo.Update(id, data)
+}
+
+// DELETE STUDENT
+func (s *StudentService) Delete(id uint) error {
+
+	_, err := s.Repo.FindByID(id)
+	if err != nil {
+		return err
+	}
+
+	return s.Repo.Delete(id)
+}
