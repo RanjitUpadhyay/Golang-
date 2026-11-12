@@ -1,0 +1,143 @@
+
+import {
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Button,
+    Typography,
+    Box,
+    TextField
+} from "@mui/material";
+
+function StudentList({
+    students,
+    onEdit,
+    onDelete,
+    search,
+    setSearch
+}) {
+
+    // Filter students using search text
+    const filteredStudents = students.filter((student) => {
+
+        const searchText = search.toLowerCase();
+
+        return (
+            student.first_name?.toLowerCase().includes(searchText) ||
+            student.last_name?.toLowerCase().includes(searchText) ||
+            student.email?.toLowerCase().includes(searchText) ||
+            student.enrollment_no?.toLowerCase().includes(searchText)
+        );
+    });
+
+    return (
+
+        <Paper sx={{ p: 3 }} elevation={2}>
+
+            <Typography variant="h5" gutterBottom>
+                Student Records
+            </Typography>
+
+            <TextField
+                fullWidth
+                label="Search students"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                sx={{ mb: 3 }}
+            />
+
+            <TableContainer>
+
+                <Table>
+
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Enrollment</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Email</TableCell>
+                            <TableCell>Phone</TableCell>
+                            <TableCell>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+
+                        {filteredStudents.map((student) => (
+
+                            <TableRow key={student.id}>
+
+                                <TableCell>
+                                    {student.id}
+                                </TableCell>
+
+                                <TableCell>
+                                    {student.enrollment_no}
+                                </TableCell>
+
+                                <TableCell>
+                                    {student.first_name} {student.last_name}
+                                </TableCell>
+
+                                <TableCell>
+                                    {student.email}
+                                </TableCell>
+
+                                <TableCell>
+                                    {student.phone}
+                                </TableCell>
+
+                                <TableCell>
+
+                                    <Box sx={{ display: "flex", gap: 1 }}>
+
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() => onEdit(student)}
+                                        >
+                                            Edit
+                                        </Button>
+
+                                        <Button
+                                            size="small"
+                                            color="error"
+                                            variant="outlined"
+                                            onClick={() => onDelete(student.id)}
+                                        >
+                                            Delete
+                                        </Button>
+
+                                    </Box>
+
+                                </TableCell>
+
+                            </TableRow>
+
+                        ))}
+
+                        {filteredStudents.length === 0 && (
+
+                            <TableRow>
+                                <TableCell colSpan={6} align="center">
+                                    No students found.
+                                </TableCell>
+                            </TableRow>
+
+                        )}
+
+                    </TableBody>
+
+                </Table>
+
+            </TableContainer>
+
+        </Paper>
+    );
+}
+
+export default StudentList;
