@@ -1,0 +1,221 @@
+
+import { useState, useEffect } from "react";
+
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Grid,
+    Paper
+} from "@mui/material";
+
+const emptyStudent = {
+    enrollment_no: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    department_id: 1,
+    course_id: 1,
+};
+
+function StudentForm({ onSubmit, editingStudent, onCancel }) {
+
+    const [student, setStudent] = useState(emptyStudent);
+
+    const [error, setError] = useState("");
+
+    // Load existing student details while editing
+    useEffect(() => {
+        if (editingStudent) {
+            setStudent({
+                enrollment_no: editingStudent.enrollment_no || "",
+                first_name: editingStudent.first_name || "",
+                last_name: editingStudent.last_name || "",
+                email: editingStudent.email || "",
+                phone: editingStudent.phone || "",
+                department_id: editingStudent.department_id,
+                course_id: editingStudent.course_id,
+            });
+        } else {
+            setStudent(emptyStudent);
+        }
+
+        setError("");
+    }, [editingStudent]);
+
+    // Update input values
+    const handleChange = (event) => {
+
+        const { name, value } = event.target;
+
+        setStudent((previousStudent) => ({
+            ...previousStudent,
+            [name]: value,
+        }));
+    };
+
+    // Submit form
+    const handleSubmit = async (event) => {
+
+        event.preventDefault();
+
+        if (
+            !student.enrollment_no.trim() ||
+            !student.first_name.trim() ||
+            !student.email.trim() ||
+            !student.department_id ||
+            !student.course_id
+        ) {
+            setError("Please fill in all required fields.");
+            return;
+        }
+
+        try {
+            setError("");
+
+            const studentData = {
+                ...student,
+                department_id: Number(student.department_id),
+                course_id: Number(student.course_id),
+            };
+
+            await onSubmit(studentData);
+
+            if (!editingStudent) {
+                setStudent(emptyStudent);
+            }
+
+        } catch (err) {
+            setError(
+                err.response?.data?.error ||
+                "Unable to save student."
+            );
+        }
+    };
+
+    return (
+        <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+
+            <Typography variant="h5" gutterBottom>
+                {editingStudent ? "Edit Student" : "Register Student"}
+            </Typography>
+
+            <Box component="form" onSubmit={handleSubmit}>
+
+                <Grid container spacing={2}>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="Enrollment Number"
+                            name="enrollment_no"
+                            value={student.enrollment_no}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="First Name"
+                            name="first_name"
+                            value={student.first_name}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="Last Name"
+                            name="last_name"
+                            value={student.last_name}
+                            onChange={handleChange}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="Email"
+                            type="email"
+                            name="email"
+                            value={student.email}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="Phone"
+                            name="phone"
+                            value={student.phone}
+                            onChange={handleChange}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="Department ID"
+                            type="number"
+                            name="department_id"
+                            value={student.department_id}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            fullWidth
+                            label="Course ID"
+                            type="number"
+                            name="course_id"
+                            value={student.course_id}
+                            onChange={handleChange}
+                            required
+                        />
+                    </Grid>
+
+                </Grid>
+
+                {error && (
+                    <Typography color="error" sx={{ mt: 2 }}>
+                        {error}
+                    </Typography>
+                )}
+
+                <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
+
+                    <Button
+                        type="submit"
+                        variant="contained"
+                    >
+                        {editingStudent ? "Update Student" : "Register Student"}
+                    </Button>
+
+                    {editingStudent && (
+                        <Button
+                            variant="outlined"
+                            onClick={onCancel}
+                        >
+                            Cancel
+                        </Button>
+                    )}
+
+                </Box>
+
+            </Box>
+
+        </Paper>
+    );
+}
+
+export default StudentForm;
