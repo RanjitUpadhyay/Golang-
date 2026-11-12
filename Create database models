@@ -1,0 +1,39 @@
+
+package models
+
+import "time"
+
+type Department struct {
+	ID             uint   `gorm:"primaryKey" json:"id"`
+	DepartmentName string `gorm:"unique;not null" json:"department_name"`
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+type Course struct {
+	ID           uint   `gorm:"primaryKey" json:"id"`
+	CourseName   string `gorm:"not null" json:"course_name"`
+	DepartmentID uint   `gorm:"not null" json:"department_id"`
+
+	Department Department `gorm:"foreignKey:DepartmentID" json:"-"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Student struct {
+	ID           uint   `gorm:"primaryKey" json:"id"`
+	EnrollmentNo string `gorm:"unique;not null" json:"enrollment_no"`
+	FirstName    string `gorm:"not null" json:"first_name"`
+	LastName     string `json:"last_name"`
+	Email        string `gorm:"unique;not null" json:"email"`
+	Phone        string `json:"phone"`
+
+	DepartmentID uint `gorm:"not null" json:"department_id"`
+	CourseID     uint `gorm:"not null" json:"course_id"`
+
+	Department Department `gorm:"foreignKey:DepartmentID" json:"department,omitempty"`
+	Course     Course     `gorm:"foreignKey:CourseID" json:"course,omitempty"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
