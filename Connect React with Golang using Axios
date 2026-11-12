@@ -1,0 +1,40 @@
+
+import axios from "axios";
+
+// Backend API base URL
+const API = axios.create({
+    baseURL: "http://localhost:8080/api",
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
+
+// CREATE STUDENT
+export const createStudent = async (student) => {
+    const response = await API.post("/students", student);
+    return response.data;
+};
+
+// GET ALL STUDENTS
+export const getStudents = async () => {
+    const response = await API.get("/students");
+    return response.data;
+};
+
+// GET ONE STUDENT
+export const getStudentById = async (id) => {
+    const response = await API.get(`/students/${id}`);
+    return response.data;
+};
+
+// UPDATE STUDENT
+export const updateStudent = async (id, student) => {
+    const response = await API.put(`/students/${id}`, student);
+    return response.data;
+};
+
+// DELETE STUDENT
+export const deleteStudent = async (id) => {
+    const response = await API.delete(`/students/${id}`);
+    return response.data;
+};
