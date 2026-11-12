@@ -1,0 +1,79 @@
+
+package main
+
+import (
+	"log"
+	"os"
+
+	"student-management-system/config"
+	"student-management-system/controllers"
+	"student-management-system/repositories"
+	"student-management-system/routes"
+	"student-management-system/services"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+
+	// Load environment variables
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Println("Warning: .env file not found")
+	}
+
+	// Connect to MySQL
+	config.ConnectDatabase()
+
+	// Create repository
+	studentRepo := repositories.NewStudentRepository(config.DB)
+
+	// Create service
+	studentService := services.NewStudentService(studentRepo)
+
+	// Create controller
+	studentController := controllers.NewStudentController(studentService)
+
+	// Create Gin server
+	router := gin.Default()
+
+	// Allow React frontend to communicate with Go backend
+	router.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
+	// Health check
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "Student Management API is running",
+		})
+	})
+
+	// Register API routes
+	routes.SetupRoutes(router, studentController)
+
+	// Start server
+	port := os.Getenv("SERVER_PORT")
+
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Println("Server running on port:", port)
+
+	err = router.Run(":" + port)
+
+	if err != nil {
+		log.Fatal("Server failed:", err)
+	}
+}
